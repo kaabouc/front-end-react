@@ -3,34 +3,94 @@ import axios from "axios";
 
 function Questionnaire() {
   const [data, setData] = useState([]);
+  const [responses, setResponses] = useState([]); // Store user responses
+  const userId = 2; // Replace with the actual user ID
 
   useEffect(() => {
     // Fetch the questionnaire data from your API endpoint
     axios.get("http://localhost:8081/questionnaire").then((response) => {
       setData(response.data);
+      // Initialize responses array with default values (0 for "je suis neutre")
+      const initialResponses = Array(response.data.length).fill(3); // 3 corresponds to "je suis neutre"
+      setResponses(initialResponses);
     });
   }, []);
 
+  const handleResponseChange = (questionIndex, choiceIndex) => {
+    const newResponses = [...responses];
+    newResponses[questionIndex] = choiceIndex;
+    setResponses(newResponses);
+  };
+
+  const handleStoreResponses = () => {
+    const dataToStore = {
+      userId,
+      choix: responses,
+      questions: data
+        .map((category) =>
+          category.cat.map((subcategory) =>
+            subcategory.questions.map((question) => question.id)
+          )
+        )
+        .flat(),
+    };
+  
+    axios
+      .post("http://localhost:8081/storeReponse", dataToStore, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+        console.log("Responses stored successfully:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error storing responses:", error);
+      });
+  };
+
   return (
-    <div>
+    <div className="container">
       <h1>Questionnaire</h1>
-      {data.map((category) => (
-        <div key={category.id}>
+      {data.map((category, categoryIndex) => (
+        <div key={category.id} className="mt-4">
           <h2>{category.libelle}</h2>
-          {category.cat.map((subcategory) => (
-            <div key={subcategory.id}>
+          {category.cat.map((subcategory, subcategoryIndex) => (
+            <div key={subcategory.id} className="mt-3">
               <h3>{subcategory.name}</h3>
-              <ul>
-                {subcategory.questions.map((question) => (
-                  <li key={question.id}>{question.qt}</li>
+              <ol>
+                {subcategory.questions.map((question, questionIndex) => (
+                  <li key={question.id} className="mb-3">
+                    {question.qt}
+                    <form>
+                      {["tout à fait d'accord", "d'accord", "neutre", "pas d'accord", "en désaccord"].map((choice, choiceIndex) => (
+                        <div className="form-check" key={choiceIndex}>
+                          <input
+                            className="form-check-input"
+                            type="radio"
+                            name={`q${question.id}`}
+                            id={`q${question.id}_choice${choiceIndex}`}
+                            value={choiceIndex + 1}
+                            checked={responses[questionIndex] === choiceIndex + 1}
+                            onChange={() => handleResponseChange(questionIndex, choiceIndex + 1)}
+                          />
+                          <label className="form-check-label" htmlFor={`q${question.id}_choice${choiceIndex}`}>
+                            {choice}
+                          </label>
+                        </div>
+                      ))}
+                    </form>
+                  </li>
                 ))}
-              </ul>
+              </ol>
             </div>
           ))}
         </div>
       ))}
+
+      <button className="btn btn-primary mt-4" onClick={handleStoreResponses}>Submit Responses</button>
     </div>
   );
-}
+};
 
 export default Questionnaire;
