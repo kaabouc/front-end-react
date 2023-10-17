@@ -17,11 +17,12 @@ const Layout = () => {
               <Link className="nav-link text-light" to="/Questionnaire">Questionnaire</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link text-light" to="/GlobalResult">diagnostique </Link>
-            </li>
-            <li className="nav-item">
               <Link className="nav-link text-light" to="/CategoryResults"> diagnostique par categories </Link>
             </li>
+            <li className="nav-item">
+              <Link className="nav-link text-light" to="/GlobalResult">diagnostique </Link>
+            </li>
+            
           </ul>
         </div>
       </nav>

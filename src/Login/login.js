@@ -70,7 +70,7 @@ function Login() {
               <p  className="mt-3 text-center">
                 Don't have an account? <a href="/">Sign Up</a>
               </p>
-              {error && <p className="error-message">{error}</p>}
+              {error && <p className="error-message" style={{color:'red' }}>{error}</p>}
             </div>
           </div>
         </div>
