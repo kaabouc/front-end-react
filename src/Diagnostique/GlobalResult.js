@@ -3,7 +3,7 @@ import axios from "axios";
 
 function GlobalResult() {
   const [globalResult, setGlobalResult] = useState(null);
-  const userId = 1; // Replace with the actual user ID
+  const userId = localStorage.getItem("userId"); // Replace with the actual user ID
 
   useEffect(() => {
     // Fetch the global result data from your API endpoint

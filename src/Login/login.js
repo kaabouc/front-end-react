@@ -17,11 +17,12 @@ function Login() {
       });
   
       // Assuming your Spring Boot backend returns a status code or message indicating success or failure
-      if (response.status === 200) {
+      if (response.data !== "") {
         // Successful login, you can redirect or perform other actions
-        console.log("Login successful");
+        console.log(response);
+        localStorage.setItem("userId",response.data.id)
         // Redirect to the diagnostique page
-        window.location.href = "/diagnostique";
+        window.location.href = "/questionnaire";
       } else {
         // Handle login failure (show an error message, etc.)
         console.log("Login failed");
@@ -66,7 +67,7 @@ function Login() {
                 </div>
                 <button type="submit" className="btn btn-primary btn-block">Login</button>
               </form>
-              <p className="mt-3 text-center">
+              <p  className="mt-3 text-center">
                 Don't have an account? <a href="/">Sign Up</a>
               </p>
               {error && <p className="error-message">{error}</p>}
@@ -75,8 +76,12 @@ function Login() {
         </div>
       </div>
     </div>
+  
     
   );
+
 }
+
+
 
 export default Login;

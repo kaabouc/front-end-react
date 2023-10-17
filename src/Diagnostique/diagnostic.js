@@ -4,14 +4,15 @@ import axios from "axios";
 function Questionnaire() {
   const [data, setData] = useState([]);
   const [responses, setResponses] = useState([]); // Store user responses
-  const userId = 2; // Replace with the actual user ID
+  const userI = localStorage.getItem("userId"); // Replace with the actual user ID
 
   useEffect(() => {
     // Fetch the questionnaire data from your API endpoint
+    
     axios.get("http://localhost:8081/questionnaire").then((response) => {
       setData(response.data);
       // Initialize responses array with default values (0 for "je suis neutre")
-      const initialResponses = Array(response.data.length).fill(3); // 3 corresponds to "je suis neutre"
+      const initialResponses = Array(response.data.length).fill(1); // 3 corresponds to "je suis neutre"
       setResponses(initialResponses);
     });
   }, []);
@@ -21,10 +22,11 @@ function Questionnaire() {
     newResponses[questionIndex] = choiceIndex;
     setResponses(newResponses);
   };
+ 
 
   const handleStoreResponses = () => {
     const dataToStore = {
-      userId,
+      userId:userI,
       choix: responses,
       questions: data
         .map((category) =>
@@ -34,12 +36,14 @@ function Questionnaire() {
         )
         .flat(),
     };
+    console.log("Data to Store:", dataToStore);
   
     axios
       .post("http://localhost:8081/storeReponse", dataToStore, {
         headers: {
           "Content-Type": "application/json",
         },
+        
       })
       .then((response) => {
         console.log("Responses stored successfully:", response.data);
@@ -63,7 +67,7 @@ function Questionnaire() {
                   <li key={question.id} className="mb-3">
                     {question.qt}
                     <form>
-                      {["tout à fait d'accord", "d'accord", "neutre", "pas d'accord", "en désaccord"].map((choice, choiceIndex) => (
+                      {["d'accord","neutre", "pas d'accord", "en désaccord","tout à fait d'accord"].map((choice, choiceIndex) => (
                         <div className="form-check" key={choiceIndex}>
                           <input
                             className="form-check-input"
@@ -71,7 +75,7 @@ function Questionnaire() {
                             name={`q${question.id}`}
                             id={`q${question.id}_choice${choiceIndex}`}
                             value={choiceIndex + 1}
-                            checked={responses[questionIndex] === choiceIndex + 1}
+                           
                             onChange={() => handleResponseChange(questionIndex, choiceIndex + 1)}
                           />
                           <label className="form-check-label" htmlFor={`q${question.id}_choice${choiceIndex}`}>

@@ -3,7 +3,7 @@ import axios from "axios";
 
 function CategoryResults() {
   const [categoryResults, setCategoryResults] = useState({});
-  const userId = 1; // Replace with the actual user ID
+  const userId = localStorage.getItem("userId"); // Replace with the actual user ID
 
   useEffect(() => {
     // Fetch the category results data from your API endpoint
