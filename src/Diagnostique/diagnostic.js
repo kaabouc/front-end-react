@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Questionnaire() {
   const [data, setData] = useState([]);
-  const [responses, setResponses] = useState([]); // Store user responses
-  const userI = localStorage.getItem("userId"); // Replace with the actual user ID
+  const [responses, setResponses] = useState([]);
+  const userId = localStorage.getItem("userId");
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch the questionnaire data from your API endpoint
-    
     axios.get("http://localhost:8081/questionnaire").then((response) => {
       setData(response.data);
       // Initialize responses array with default values (0 for "je suis neutre")
-      const initialResponses = Array(response.data.length).fill(1); // 3 corresponds to "je suis neutre"
+      const initialResponses = Array(response.data.length).fill(1); // 2 corresponds to "neutre"
       setResponses(initialResponses);
     });
   }, []);
@@ -22,31 +23,42 @@ function Questionnaire() {
     newResponses[questionIndex] = choiceIndex;
     setResponses(newResponses);
   };
- 
 
   const handleStoreResponses = () => {
-    const dataToStore = {
-      userId:userI,
-      choix: responses,
-      questions: data
-        .map((category) =>
-          category.cat.map((subcategory) =>
-            subcategory.questions.map((question) => question.id)
-          )
-        )
-        .flat(),
-    };
-    console.log("Data to Store:", dataToStore);
-  
+    // Create a FormData object to hold the data
+    const formData = new FormData();
+
+    // Append user ID to FormData
+    formData.append("userId", userId);
+
+    // Create arrays for questions and choices
+    const questionIds = [];
+    const choix = [];
+
+    // Populate the arrays
+    data.forEach((category) => {
+      category.cat.forEach((subcategory) => {
+        subcategory.questions.forEach((question, questionIndex) => {
+          questionIds.push(question.id);
+          choix.push(responses[questionIndex]);
+        });
+      });
+    });
+
+    // Append question IDs and choices as arrays to FormData
+    formData.append("questions", questionIds);
+    formData.append("choix", choix);
+
     axios
-      .post("http://localhost:8081/storeReponse", dataToStore, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        
-      })
+      .post("http://localhost:8081/storeReponse", formData)
       .then((response) => {
-        console.log("Responses stored successfully:", response.data);
+        if(response.data="stored correctly"){     
+           console.log("Responses stored successfully:", response.data);
+        navigate('/CategoryResults');}
+        else{
+          console.log("storage field")
+        }
+  
       })
       .catch((error) => {
         console.error("Error storing responses:", error);
